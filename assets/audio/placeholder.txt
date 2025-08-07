@@ -1,0 +1,30 @@
+# Assets/Audio Directory
+
+This directory should contain:
+
+## Sound Effects
+- button_tap.mp3
+- correct_answer.mp3
+- incorrect_answer.mp3
+- mission_complete.mp3
+- level_up.mp3
+- achievement_unlock.mp3
+
+## Background Music
+- menu_background.mp3
+- game_background.mp3
+- result_celebration.mp3
+
+## Voice Assets (Optional)
+- mission_instructions/
+  - welcome_message.mp3
+  - real_or_fake_prompt.mp3
+  - encouragement_phrases.mp3
+
+## UI Feedback Sounds
+- page_transition.mp3
+- loading_complete.mp3
+- error_notification.mp3
+
+TODO: Add actual audio assets for production app
+TODO: Implement audio service with flutter/services or audio_players package

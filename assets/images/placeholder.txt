@@ -1,0 +1,35 @@
+# Assets/Images Directory
+
+This directory should contain:
+
+## Mission Images
+- mission_sample_1.jpg
+- mission_sample_2.jpg
+- mission_sample_3.jpg
+- ... (additional mission images)
+
+## UI Assets
+- app_icon.png
+- splash_screen_bg.png
+- achievement_badges/
+  - first_mission.png
+  - accuracy_expert.png
+  - streak_master.png
+
+## Child Avatar Assets
+- avatars/
+  - unicorn.png
+  - rocket.png
+  - star.png
+  - detective.png
+  - superhero.png
+
+## Game Assets
+- buttons/
+  - real_button_active.png
+  - fake_button_active.png
+- animations/
+  - confetti.json (Lottie animation)
+  - loading_spinner.json
+
+TODO: Add actual image assets for production app
