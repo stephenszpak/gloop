@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../screens/guest_landing_screen.dart';
 import '../screens/parent_login_screen.dart';
 import '../screens/child_profile_screen.dart';
 import '../screens/mission_screen.dart';
@@ -12,6 +13,11 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
+        name: 'guest_landing',
+        builder: (context, state) => const GuestLandingScreen(),
+      ),
+      GoRoute(
+        path: '/login',
         name: 'login',
         builder: (context, state) => const ParentLoginScreen(),
       ),
