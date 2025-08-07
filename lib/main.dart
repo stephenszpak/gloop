@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
@@ -71,7 +73,6 @@ class _RealityAnchorAppState extends ConsumerState<RealityAnchorApp>
 
   Future<void> _loadThemeMode() async {
     try {
-      // TODO: Replace with shared_preferences package for production
       final prefs = await SharedPreferences.getInstance();
       final savedThemeMode = prefs.getString('theme_mode') ?? 'system';
       
@@ -152,30 +153,12 @@ class _RealityAnchorAppState extends ConsumerState<RealityAnchorApp>
               MediaQuery.of(context).textScaler.scale(1.0).clamp(0.8, 1.3),
             ),
           ),
-          child: Stack(
-            children: [
-              child ?? const SizedBox.shrink(),
-              
-              if (_shouldShowThemeToggle(context))
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 10,
-                  right: 20,
-                  child: _ThemeToggleButton(
-                    themeMode: _themeMode,
-                    onToggle: _toggleTheme,
-                  ),
-                ),
-            ],
-          ),
+          child: child ?? const SizedBox.shrink(),
         );
       },
     );
   }
 
-  bool _shouldShowThemeToggle(BuildContext context) {
-    final currentRoute = GoRouterState.of(context).matchedLocation;
-    return currentRoute == '/' || currentRoute == '/children';
-  }
 }
 
 class _ThemeToggleButton extends StatelessWidget {
@@ -222,7 +205,6 @@ class _ThemeToggleButton extends StatelessWidget {
       child: IconButton(
         onPressed: onToggle,
         icon: Icon(icon),
-        tooltip: tooltip,
         iconSize: 20,
         padding: const EdgeInsets.all(8),
         constraints: const BoxConstraints(
@@ -235,20 +217,3 @@ class _ThemeToggleButton extends StatelessWidget {
   }
 }
 
-// TODO: Remove this mock class and use actual shared_preferences package
-class SharedPreferences {
-  static Future<SharedPreferences> getInstance() async {
-    return SharedPreferences._();
-  }
-  
-  SharedPreferences._();
-  
-  final Map<String, String> _prefs = {};
-  
-  String? getString(String key) => _prefs[key];
-  
-  Future<bool> setString(String key, String value) async {
-    _prefs[key] = value;
-    return true;
-  }
-}
