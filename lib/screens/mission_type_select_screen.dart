@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class MissionType {
   final String type;
@@ -26,20 +27,8 @@ class MissionTypeSelectScreen extends StatelessWidget {
   void _onSelect(BuildContext context, String type) {
     debugPrint('Selected mission type: $type');
     
-    // Show feedback to user
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Starting $type missions...'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
-
-    // TODO: Navigate to mission screen with selected type
-    // Navigator.pushNamed(context, '/mission', arguments: type);
+    // Navigate to mission instructions screen
+    context.go('/mission-instructions?type=$type');
   }
 
   @override
@@ -131,89 +120,44 @@ class MissionTypeSelectScreen extends StatelessWidget {
   }
 
   Widget _buildMissionButton(BuildContext context, MissionType missionType) {
-    return InkWell(
-      onTap: () => _onSelect(context, missionType.type),
-      borderRadius: BorderRadius.circular(16),
-      child: Semantics(
-        label: '${missionType.label} mission button',
-        hint: 'Tap to start ${missionType.label} missions',
-        child: Container(
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Stack(
-              children: [
-                // Background Image
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/buttons/true_or_fake_story.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      debugPrint('Failed to load button image: $error');
-                      return _buildFallbackButton(context, missionType);
-                    },
-                  ),
-                ),
-                // Dark overlay for text readability
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.3),
-                          Colors.black.withOpacity(0.6),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Text Overlay
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      missionType.label,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black54,
-                            blurRadius: 4,
-                            offset: Offset(1, 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Interactive feedback overlay
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => _onSelect(context, missionType.type),
-                      splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                      highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    ),
-                  ),
-                ),
-              ],
+    return Semantics(
+      label: '${missionType.label} mission button',
+      hint: 'Tap to start ${missionType.label} missions',
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          borderRadius: BorderRadius.circular(16),
+          elevation: 0,
+          clipBehavior: Clip.hardEdge,
+          child: InkWell(
+            onTap: () => _onSelect(context, missionType.type),
+            splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            child: Image.asset(
+              'assets/images/buttons/true_or_fake_story.png',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (context, error, stackTrace) {
+                debugPrint('Failed to load button image: $error');
+                return _buildFallbackButton(context, missionType);
+              },
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 class GuestLandingScreen extends StatefulWidget {
   const GuestLandingScreen({super.key});
@@ -58,160 +59,160 @@ class _GuestLandingScreenState extends State<GuestLandingScreen>
     // Add haptic feedback for better user experience
     HapticFeedback.lightImpact();
     
-    // TODO: Implement guest session setup and navigation
-    // This will later navigate to MissionTypeSelectScreen
     debugPrint('Guest login tapped - setting up guest session...');
     
-    // Placeholder navigation for now
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Starting guest session...'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
+    // Navigate to character introduction screen
+    context.go('/character-intro');
   }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.height < 700;
     
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F1E7), // Solid background color
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            // Background Image
-            _buildBackgroundImage(),
+            // Main content area with centered image
+            Expanded(
+              child: Center(
+                child: _buildMainImage(screenSize),
+              ),
+            ),
             
-            // Guest Button positioned at bottom
-            _buildGuestButton(isSmallScreen),
+            // Guest button at bottom
+            _buildGuestButton(screenSize),
+            
+            // Bottom padding
+            const SizedBox(height: 50),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBackgroundImage() {
-    return Positioned.fill(
-      child: Image.asset(
-        'assets/images/pages/landing_page_v1.png',
-        fit: BoxFit.cover,
-        semanticLabel: 'Reality Anchor welcome background',
-        errorBuilder: (context, error, stackTrace) {
-          // Fallback gradient background if image fails to load
-          debugPrint('Failed to load background image: $error');
-          return Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                  Theme.of(context).colorScheme.secondary.withOpacity(0.6),
-                  Theme.of(context).colorScheme.background,
-                ],
-                stops: const [0.0, 0.5, 1.0],
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.anchor,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.onBackground,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Reality Anchor',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Learn to spot real from fake!',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground.withOpacity(0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildGuestButton(bool isSmallScreen) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: isSmallScreen ? 20 : 40,
-      child: AnimatedBuilder(
-        animation: Listenable.merge([_buttonScaleAnimation, _buttonFadeAnimation]),
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _buttonScaleAnimation.value,
-            child: Opacity(
-              opacity: _buttonFadeAnimation.value,
-              child: child,
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: _buildGuestButtonContent(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGuestButtonContent() {
-    return GestureDetector(
-      onTap: _onGuestLogin,
-      child: Semantics(
-        label: 'Play as guest button',
-        hint: 'Tap to start playing Reality Anchor without creating an account',
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.asset(
-              'assets/images/buttons/play_as_guest.png',
-              height: 64,
-              fit: BoxFit.contain,
-              semanticLabel: 'Play as guest',
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback button if image fails to load
-                debugPrint('Failed to load guest button image: $error');
-                return _buildFallbackButton();
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFallbackButton() {
+  Widget _buildMainImage(Size screenSize) {
+    // Calculate responsive image size
+    final imageMaxWidth = screenSize.width * 0.8;
+    final imageMaxHeight = screenSize.height * 0.6;
+    
     return Container(
+      constraints: BoxConstraints(
+        maxWidth: imageMaxWidth,
+        maxHeight: imageMaxHeight,
+      ),
+      child: Image.asset(
+        'assets/images/pages/guest_login.png',
+        fit: BoxFit.contain,
+        semanticLabel: 'Detective Gloop with magnifying glass - Reality Anchor character',
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('Failed to load main image: $error');
+          return _buildFallbackMainImage();
+        },
+      ),
+    );
+  }
+
+  Widget _buildFallbackMainImage() {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search,
+            size: 80,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Reality Anchor',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Learn to spot real from fake!',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestButton(Size screenSize) {
+    // Responsive button width
+    final buttonWidth = screenSize.width * 0.6;
+    
+    return AnimatedBuilder(
+      animation: Listenable.merge([_buttonScaleAnimation, _buttonFadeAnimation]),
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _buttonScaleAnimation.value,
+          child: Opacity(
+            opacity: _buttonFadeAnimation.value,
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: _onGuestLogin,
+        child: Semantics(
+          label: 'Play as guest button',
+          hint: 'Tap to start playing Reality Anchor without creating an account',
+          child: Container(
+            width: buttonWidth,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/buttons/play_as_guest.png',
+                width: buttonWidth,
+                fit: BoxFit.contain,
+                semanticLabel: 'Play as guest',
+                errorBuilder: (context, error, stackTrace) {
+                  debugPrint('Failed to load guest button image: $error');
+                  return _buildFallbackButton(buttonWidth);
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackButton(double width) {
+    return Container(
+      width: width,
       height: 64,
       decoration: BoxDecoration(
         gradient: LinearGradient(

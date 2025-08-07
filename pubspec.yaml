@@ -40,6 +40,7 @@ flutter:
     - assets/images/pages/
     - assets/images/buttons/
     - assets/icons/
+    - assets/images/characters/
   
   fonts:
     - family: Comic

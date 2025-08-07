@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/guest_landing_screen.dart';
+import '../screens/character_intro_screen.dart';
+import '../screens/mission_type_select_screen.dart';
+import '../screens/mission_instructions_screen.dart';
 import '../screens/parent_login_screen.dart';
 import '../screens/child_profile_screen.dart';
 import '../screens/mission_screen.dart';
 import '../screens/result_screen.dart';
 import '../screens/progress_screen.dart';
+import '../widgets/detective_speech_bubble.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -15,6 +19,24 @@ class AppRouter {
         path: '/',
         name: 'guest_landing',
         builder: (context, state) => const GuestLandingScreen(),
+      ),
+      GoRoute(
+        path: '/character-intro',
+        name: 'character_intro',
+        builder: (context, state) => const CharacterIntroScreen(),
+      ),
+      GoRoute(
+        path: '/mission-select',
+        name: 'mission_select',
+        builder: (context, state) => const MissionTypeSelectScreen(),
+      ),
+      GoRoute(
+        path: '/mission-instructions',
+        name: 'mission_instructions',
+        builder: (context, state) {
+          final missionType = state.uri.queryParameters['type'];
+          return MissionInstructionsScreen(missionType: missionType);
+        },
       ),
       GoRoute(
         path: '/login',
@@ -55,6 +77,11 @@ class AppRouter {
         path: '/progress',
         name: 'progress',
         builder: (context, state) => const ProgressScreen(),
+      ),
+      GoRoute(
+        path: '/speech-bubble-demo',
+        name: 'speech_bubble_demo',
+        builder: (context, state) => const DetectiveSpeechBubbleExample(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
