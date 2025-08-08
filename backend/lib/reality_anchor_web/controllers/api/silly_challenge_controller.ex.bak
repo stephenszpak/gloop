@@ -1,0 +1,94 @@
+defmodule RealityAnchorWeb.Api.SillyChallengeController do
+  use RealityAnchorWeb, :controller
+
+  alias RealityAnchor.Games
+  alias RealityAnchor.Games.SillyImageChallenge
+
+  action_fallback RealityAnchorWeb.FallbackController
+
+  @doc """
+  GET /api/silly_challenges - List all challenges (optionally filtered by difficulty)
+  """
+  def index(conn, params) do
+    challenges = case params["difficulty"] do
+      nil -> Games.list_silly_image_challenges()
+      difficulty -> Games.list_silly_image_challenges_by_difficulty(difficulty)
+    end
+    
+    render(conn, :index, challenges: challenges)
+  end
+
+  @doc """
+  GET /api/silly_challenges/random?difficulty=easy - Get a random challenge
+  """
+  def random(conn, params) do
+    difficulty = params["difficulty"] || "easy"
+    
+    case Games.get_random_silly_image_challenge(difficulty) do
+      nil -> 
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "No challenges found for difficulty: #{difficulty}"})
+      challenge ->
+        render(conn, :show, challenge: challenge)
+    end
+  end
+
+  @doc """
+  GET /api/silly_challenges/:id - Show a specific challenge
+  """
+  def show(conn, %{"id" => id}) do
+    case Games.get_silly_image_challenge(id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Challenge not found"})
+      challenge ->
+        render(conn, :show, challenge: challenge)
+    end
+  end
+
+  @doc """
+  POST /api/silly_challenges/:id/submit - Submit taps for a challenge
+  
+  Expected payload:
+  {
+    "taps": [
+      {"x": 0.32, "y": 0.42},
+      {"x": 0.15, "y": 0.78}
+    ]
+  }
+  """
+  def submit(conn, %{"id" => id, "taps" => taps}) when is_list(taps) do
+    case Games.get_silly_image_challenge(id) do
+      nil ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Challenge not found"})
+      challenge ->
+        result = Games.process_silly_challenge_submission(challenge, taps)
+        render(conn, :submission_result, result: result)
+    end
+  end
+
+  def submit(conn, %{"id" => _id}) do
+    conn
+    |> put_status(:bad_request)
+    |> json(%{error: "Missing or invalid 'taps' parameter"})
+  end
+
+  @doc """
+  POST /api/silly_challenges - Create a new challenge (admin only)
+  """
+  def create(conn, %{"challenge" => challenge_params}) do
+    case Games.create_silly_image_challenge(challenge_params) do
+      {:ok, challenge} ->
+        conn
+        |> put_status(:created)
+        |> render(:show, challenge: challenge)
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(RealityAnchorWeb.ChangesetView, "error.json", changeset: changeset)
+    end
+  end

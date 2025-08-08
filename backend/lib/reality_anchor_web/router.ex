@@ -34,6 +34,11 @@ defmodule RealityAnchorWeb.Router do
     post "/missions/:id/submit", MissionController, :submit
     resources "/missions", MissionController, only: [:index, :show]
 
+    # Silly Thing Game Challenges (only endpoints requested in original spec)
+    get "/silly_challenges/random", SillyChallengeController, :random
+    get "/silly_challenges/:id", SillyChallengeController, :show
+    post "/silly_challenges/:id/submit", SillyChallengeController, :submit
+
     # Guest child profiles
     post "/guest/child_profiles", ChildProfileController, :create_guest
     get "/guest/child_profiles/:id/progress", ChildProfileController, :guest_progress
@@ -52,6 +57,13 @@ defmodule RealityAnchorWeb.Router do
       get "/progress", ChildProfileController, :progress
       get "/recent_submissions", ChildProfileController, :recent_submissions
     end
+  end
+
+  # Serve static images and proxy external images
+  scope "/" do
+    pipe_through :api
+    get "/images/*path", RealityAnchorWeb.ImageController, :images
+    get "/proxy-image", RealityAnchorWeb.ImageController, :proxy
   end
 
   # Enable LiveDashboard in development

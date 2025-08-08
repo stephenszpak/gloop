@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MissionType {
   final String type;
@@ -15,20 +17,38 @@ class MissionTypeSelectScreen extends StatelessWidget {
   const MissionTypeSelectScreen({super.key});
 
   static const List<MissionType> missionTypes = [
-    MissionType(type: "real_or_fake_image", label: "Real or Fake Image"),
-    MissionType(type: "true_or_fake_story", label: "True or Fake Story"),
-    MissionType(type: "spot_the_clue", label: "Spot the Clue"),
-    MissionType(type: "real_or_fake_headline", label: "Real or Fake Headline"),
-    MissionType(type: "which_link_is_real", label: "Which Link Is Real?"),
     MissionType(type: "spot_the_silly_thing", label: "Spot the Silly Thing"),
-    MissionType(type: "match_sound_to_image", label: "Match Sound to Image"),
   ];
 
   void _onSelect(BuildContext context, String type) {
     debugPrint('Selected mission type: $type');
     
-    // Navigate to mission instructions screen
-    context.go('/mission-instructions?type=$type');
+    // Navigate to Spot the Silly Thing game with a random challenge
+    if (type == 'spot_the_silly_thing') {
+      _navigateToRandomChallenge(context);
+    }
+  }
+
+  void _navigateToRandomChallenge(BuildContext context) async {
+    try {
+      // Get a random challenge ID from the API
+      final response = await http.get(
+        Uri.parse('http://localhost:4000/api/v1/silly_challenges/random'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final challengeId = data['data']['id'].toString();
+        context.go('/silly-thing-game/$challengeId');
+      } else {
+        // Fallback to a known challenge if API fails
+        context.go('/silly-thing-game/2');
+      }
+    } catch (e) {
+      // Fallback to a known challenge if network fails
+      context.go('/silly-thing-game/2');
+    }
   }
 
   @override
@@ -149,23 +169,14 @@ class MissionTypeSelectScreen extends StatelessWidget {
             onTap: () => _onSelect(context, missionType.type),
             splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
             highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            child: Image.asset(
-              'assets/images/buttons/true_or_fake_story.png',
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              errorBuilder: (context, error, stackTrace) {
-                debugPrint('Failed to load button image: $error');
-                return _buildFallbackButton(context, missionType);
-              },
-            ),
+            child: _buildTextButton(context, missionType),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFallbackButton(BuildContext context, MissionType missionType) {
+  Widget _buildTextButton(BuildContext context, MissionType missionType) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -206,20 +217,8 @@ class MissionTypeSelectScreen extends StatelessWidget {
 
   IconData _getMissionIcon(String type) {
     switch (type) {
-      case 'real_or_fake_image':
-        return Icons.image;
-      case 'true_or_fake_story':
-        return Icons.library_books;
-      case 'spot_the_clue':
-        return Icons.search;
-      case 'real_or_fake_headline':
-        return Icons.article;
-      case 'which_link_is_real':
-        return Icons.link;
       case 'spot_the_silly_thing':
         return Icons.emoji_emotions;
-      case 'match_sound_to_image':
-        return Icons.volume_up;
       default:
         return Icons.quiz;
     }

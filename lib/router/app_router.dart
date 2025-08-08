@@ -9,6 +9,7 @@ import '../screens/child_profile_screen.dart';
 import '../screens/mission_screen.dart';
 import '../screens/result_screen.dart';
 import '../screens/progress_screen.dart';
+import '../screens/silly_thing_game_screen.dart';
 import '../widgets/detective_speech_bubble.dart';
 
 class AppRouter {
@@ -77,6 +78,16 @@ class AppRouter {
         path: '/progress',
         name: 'progress',
         builder: (context, state) => const ProgressScreen(),
+      ),
+      GoRoute(
+        path: '/silly-thing-game/:challengeId',
+        name: 'silly_thing_game',
+        builder: (context, state) {
+          final challengeId = state.pathParameters['challengeId']!;
+          return SillyThingGameScreen(
+            challengeId: challengeId,
+          );
+        },
       ),
       GoRoute(
         path: '/speech-bubble-demo',

@@ -1,140 +1,133 @@
 import 'package:flutter/material.dart';
+import 'voiceover_bubble.dart';
 
-/// A reusable widget that displays Detective Gloop with a speech bubble
-/// containing custom text. Designed specifically for children's apps with
-/// proper scaling and responsive text layout.
-class DetectiveBubble extends StatelessWidget {
-  /// The text to display inside the speech bubble
-  final String text;
-  
-  /// Optional text style override
-  final TextStyle? textStyle;
-  
-  /// Optional constraints for the text bubble area
-  final BoxConstraints? bubbleConstraints;
-  
-  /// Optional padding around the entire widget
-  final EdgeInsetsGeometry? padding;
+/// A reusable widget that displays Detective Gloop with a magnifying glass
+/// and speech bubble in the top portion. Designed for children's apps
+/// with proper scaling to ensure text fits clearly within the speech bubble.
+class DetectiveBubble extends StatefulWidget {
+  /// The VoiceoverBubble widget to display (text goes in speech bubble, controls below image)
+  final VoiceoverBubble voiceoverBubble;
 
   const DetectiveBubble({
     super.key,
-    required this.text,
-    this.textStyle,
-    this.bubbleConstraints,
-    this.padding,
+    required this.voiceoverBubble,
   });
+
+  @override
+  State<DetectiveBubble> createState() => _DetectiveBubbleState();
+}
+
+class _DetectiveBubbleState extends State<DetectiveBubble> {
+  final _voiceoverController = VoiceoverController();
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final safeArea = MediaQuery.of(context).padding;
     
-    // Calculate available space accounting for safe areas
-    final availableWidth = screenSize.width - safeArea.left - safeArea.right;
+    // Calculate available height accounting for safe areas
     final availableHeight = screenSize.height - safeArea.top - safeArea.bottom;
     
-    // Apply consistent margin (5-10% padding on all sides)
-    final margin = EdgeInsets.symmetric(
-      horizontal: availableWidth * 0.05,
-      vertical: availableHeight * 0.05,
-    );
+    // Use 60% of available height for the image, leaving room for controls below
+    final imageHeight = availableHeight * 0.6;
     
-    return Padding(
-      padding: padding ?? margin,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return AspectRatio(
-            // Adjust this ratio based on your actual image dimensions
-            // This assumes the image is roughly 4:3 (width:height)
-            aspectRatio: 4 / 3,
+    // Use 95% of screen width for better visibility
+    final imageWidth = screenSize.width * 0.95;
+    
+    return SafeArea(
+      child: Column(
+        children: [
+          // Detective Gloop image with text inside speech bubble
+          Expanded(
+            flex: 3,
+            child: Center(
+              child: _buildDetectiveBubbleWithText(context, imageWidth, imageHeight),
+            ),
+          ),
+          
+          // TTS Control buttons below the image
+          Expanded(
+            flex: 1,
             child: Container(
-              width: constraints.maxWidth,
-              child: Stack(
-                children: [
-                  // Background image with proper scaling
-                  Positioned.fill(
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Image.asset(
-                        'assets/images/characters/gloop_background_bubble.png',
-                        errorBuilder: (context, error, stackTrace) {
-                          debugPrint('Failed to load detective bubble image: $error');
-                          return _buildFallbackBubble(context, constraints);
-                        },
-                      ),
-                    ),
-                  ),
-                  
-                  // Text overlay positioned in the speech bubble
-                  _buildTextOverlay(context, constraints),
-                ],
+              color: Colors.grey.withOpacity(0.1), // Debug background
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: _voiceoverController.buildControls(context),
+                ),
               ),
             ),
-          );
-        },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetectiveBubbleWithText(BuildContext context, double imageWidth, double imageHeight) {
+    return SizedBox(
+      width: imageWidth,
+      height: imageHeight,
+      child: Stack(
+        children: [
+          // Background image - sized to fill the container while preserving aspect ratio
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/characters/gloop_speech_top.png',
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                debugPrint('Failed to load detective bubble image: $error');
+                return _buildFallbackBubble(context, imageWidth, imageHeight);
+              },
+            ),
+          ),
+          
+          // VoiceoverBubble positioned in the speech bubble area (top portion of image)
+          _buildTextOverlay(context, imageWidth, imageHeight),
+        ],
       ),
     );
   }
 
   /// Builds the text overlay positioned within the speech bubble area
-  Widget _buildTextOverlay(BuildContext context, BoxConstraints constraints) {
-    // Calculate bubble text area positioning
-    // These percentages should be adjusted based on your actual image layout
-    final bubbleWidth = constraints.maxWidth;
-    final bubbleHeight = constraints.maxWidth / (4/3); // Maintain aspect ratio
-    
-    // Position the text in the upper portion of the bubble
-    // Adjust these values based on where the speech bubble appears in your image
-    final textTop = bubbleHeight * 0.15;    // 15% from top
-    final textLeft = bubbleWidth * 0.2;     // 20% from left
-    final textWidth = bubbleWidth * 0.6;    // 60% of total width
-    final textHeight = bubbleHeight * 0.35;  // 35% of total height
+  Widget _buildTextOverlay(BuildContext context, double imageWidth, double imageHeight) {
+    // Calculate speech bubble positioning based on the image layout
+    // The speech bubble is in the top-left portion of the image
+    final speechBubbleTop = imageHeight * 0.05;    // 5% from top
+    final speechBubbleLeft = imageWidth * 0.05;     // 5% from left  
+    final speechBubbleWidth = imageWidth * 0.85;    // 85% of width
+    final speechBubbleHeight = imageHeight * 0.45;  // 45% of height (upper portion)
     
     return Positioned(
-      top: textTop,
-      left: textLeft,
-      child: Container(
-        width: textWidth,
-        height: textHeight,
-        constraints: bubbleConstraints ?? BoxConstraints(
-          maxWidth: textWidth,
-          maxHeight: textHeight,
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Text(
-              text,
-              style: _getEffectiveTextStyle(context, bubbleWidth),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
-            ),
+      top: speechBubbleTop,
+      left: speechBubbleLeft,
+      child: SizedBox(
+        width: speechBubbleWidth,
+        height: speechBubbleHeight,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: VoiceoverBubble(
+            text: widget.voiceoverBubble.text,
+            baseStyle: widget.voiceoverBubble.baseStyle,
+            highlightStyle: widget.voiceoverBubble.highlightStyle,
+            wordDelayCalculator: widget.voiceoverBubble.wordDelayCalculator,
+            autoStart: widget.voiceoverBubble.autoStart,
+            onComplete: widget.voiceoverBubble.onComplete,
+            controller: _voiceoverController,
           ),
         ),
       ),
     );
   }
 
-  /// Gets the effective text style with responsive sizing
-  TextStyle _getEffectiveTextStyle(BuildContext context, double bubbleWidth) {
-    // Calculate responsive font size based on bubble width
-    final baseFontSize = (bubbleWidth * 0.045).clamp(16.0, 24.0);
-    
-    final defaultStyle = TextStyle(
-      fontSize: baseFontSize,
-      fontWeight: FontWeight.w600,
-      color: const Color(0xFF004B4B),
-      height: 1.4, // Good line spacing for readability
-      fontFamily: 'Comic',
-    );
-    
-    return textStyle != null ? defaultStyle.merge(textStyle) : defaultStyle;
-  }
 
   /// Fallback UI when the background image fails to load
-  Widget _buildFallbackBubble(BuildContext context, BoxConstraints constraints) {
+  Widget _buildFallbackBubble(BuildContext context, double imageWidth, double maxImageHeight) {
+    // Use the constrained max height for fallback
+    final fallbackHeight = maxImageHeight.clamp(imageWidth * 0.6, imageWidth * 0.8);
+    
     return Container(
-      width: constraints.maxWidth,
-      height: constraints.maxWidth / (4/3),
+      width: imageWidth,
+      height: fallbackHeight,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -159,42 +152,17 @@ class DetectiveBubble extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Detective character placeholder
+          // Speech bubble area (top portion)
           Positioned(
-            bottom: 20,
-            left: 30,
+            top: 20,
+            left: 20,
+            right: 20,
+            height: fallbackHeight * 0.45, // Top 45% for speech bubble
             child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFF38B3AC),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.person_search,
-                size: 40,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          
-          // Speech bubble area
-          Positioned(
-            top: 30,
-            left: 40,
-            right: 40,
-            child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: const Color(0xFF157C84),
                   width: 2,
@@ -207,88 +175,63 @@ class DetectiveBubble extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Text(
-                text,
-                style: _getEffectiveTextStyle(context, constraints.maxWidth),
-                textAlign: TextAlign.center,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: VoiceoverBubble(
+                  text: widget.voiceoverBubble.text,
+                  baseStyle: widget.voiceoverBubble.baseStyle,
+                  highlightStyle: widget.voiceoverBubble.highlightStyle,
+                  wordDelayCalculator: widget.voiceoverBubble.wordDelayCalculator,
+                  autoStart: widget.voiceoverBubble.autoStart,
+                  onComplete: widget.voiceoverBubble.onComplete,
+                  controller: _voiceoverController,
+                ),
+              ),
+            ),
+          ),
+          
+          // Detective character placeholder (bottom portion)
+          Positioned(
+            bottom: 20,
+            left: imageWidth * 0.3,
+            child: Container(
+              width: imageWidth * 0.4,
+              height: imageWidth * 0.4,
+              decoration: BoxDecoration(
+                color: const Color(0xFF38B3AC),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Icon(
+                      Icons.person_search,
+                      size: imageWidth * 0.15,
+                      color: Colors.white,
+                    ),
+                  ),
+                  // Pointing up indicator
+                  Positioned(
+                    top: 10,
+                    right: 15,
+                    child: Icon(
+                      Icons.arrow_upward,
+                      size: imageWidth * 0.08,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Example usage screen demonstrating the DetectiveBubble widget
-class DetectiveBubbleExample extends StatelessWidget {
-  const DetectiveBubbleExample({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFDF3DE),
-      appBar: AppBar(
-        title: const Text('Detective Bubble Example'),
-        backgroundColor: const Color(0xFF157C84),
-        foregroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Main example
-              const DetectiveBubble(
-                text: "Hi there! I'm Detective Gloop, your media literacy guide! I help kids like you learn to spot what's real and what's fake. Are you ready to become a super detective and play some exciting games?",
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Smaller example with custom styling
-              DetectiveBubble(
-                text: "Great job! You're becoming a real detective.",
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F4C4D),
-                ),
-                padding: const EdgeInsets.all(10),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Action buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Detective Gloop says: Keep learning!'),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE1B94A),
-                      foregroundColor: const Color(0xFF0F4C4D),
-                    ),
-                    child: const Text('Continue'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF157C84),
-                      side: const BorderSide(color: Color(0xFF157C84)),
-                    ),
-                    child: const Text('Back'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -297,62 +240,33 @@ class DetectiveBubbleExample extends StatelessWidget {
 /*
 USAGE EXAMPLES:
 
-// Basic usage
+// Basic usage with VoiceoverBubble
 DetectiveBubble(
-  text: "Welcome to the mission!",
-)
-
-// With custom text styling
-DetectiveBubble(
-  text: "Look for clues carefully!",
-  textStyle: TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.bold,
-    color: Colors.blue,
+  voiceoverBubble: VoiceoverBubble(
+    text: "Welcome to the mission!",
+    baseStyle: TextStyle(fontSize: 16, color: Colors.teal),
+    highlightStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
   ),
 )
 
-// With custom constraints and padding
+// With custom styling
 DetectiveBubble(
-  text: "Great detective work!",
-  bubbleConstraints: BoxConstraints(
-    maxWidth: 200,
-    maxHeight: 100,
+  voiceoverBubble: VoiceoverBubble(
+    text: "Look for clues carefully!",
+    baseStyle: TextStyle(fontSize: 18, color: Colors.blue),
+    highlightStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
   ),
-  padding: EdgeInsets.all(20),
 )
 
-// In a game screen
+// In a game screen - text appears in speech bubble, controls appear below image
 class GameInstructionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          DetectiveBubble(
-            text: "Your mission: Find the fake news story among these headlines!",
-          ),
-          // ... rest of your game UI
-        ],
-      ),
-    );
-  }
-}
-
-// Responsive usage in different orientations
-class ResponsiveDetectiveScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: OrientationBuilder(
-        builder: (context, orientation) {
-          return DetectiveBubble(
-            text: "I adapt to any screen size and orientation!",
-            padding: EdgeInsets.all(
-              orientation == Orientation.portrait ? 16.0 : 8.0,
-            ),
-          );
-        },
+      body: DetectiveBubble(
+        voiceoverBubble: VoiceoverBubble(
+          text: "Your mission: Find the fake news story among these headlines!",
+        ),
       ),
     );
   }

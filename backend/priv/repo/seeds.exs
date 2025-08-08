@@ -10,13 +10,15 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias RealityAnchor.{Repo, Accounts, Missions}
+alias RealityAnchor.{Repo, Accounts, Missions, Games}
 alias RealityAnchor.Missions.Mission
+alias RealityAnchor.Games.SillyImageChallenge
 
 # Clear existing data in development
 if Mix.env() == :dev do
   Repo.delete_all(Missions.Submission)
   Repo.delete_all(Mission)
+  Repo.delete_all(SillyImageChallenge)
   Repo.delete_all(Accounts.ChildProfile) 
   Repo.delete_all(Accounts.User)
 end
@@ -257,10 +259,101 @@ Enum.each(sample_submissions, fn {mission, answer, time_ms} ->
   end
 end)
 
+# Sample Silly Image Challenges
+silly_challenges = [
+  %{
+    title: "Silly Farm Animals",
+    image_url: "https://example.com/silly-challenges/farm-animals.jpg",
+    difficulty: "easy",
+    regions: [
+      %{
+        "x" => 0.32,
+        "y" => 0.42,
+        "width" => 0.12,
+        "height" => 0.15,
+        "label" => "pig wearing sunglasses",
+        "explanation" => "Pigs don't usually wear sunglasses! They prefer to roll in mud to stay cool."
+      },
+      %{
+        "x" => 0.65,
+        "y" => 0.28,
+        "width" => 0.1,
+        "height" => 0.18,
+        "label" => "cow with a party hat",
+        "explanation" => "Cows don't wear party hats! They're more interested in eating grass than celebrating."
+      }
+    ],
+    created_by_ai: true
+  },
+  %{
+    title: "Silly Kitchen Scene",
+    image_url: "https://example.com/silly-challenges/kitchen-scene.jpg", 
+    difficulty: "easy",
+    regions: [
+      %{
+        "x" => 0.25,
+        "y" => 0.35,
+        "width" => 0.15,
+        "height" => 0.12,
+        "label" => "toaster wearing a chef hat",
+        "explanation" => "Toasters don't wear chef hats! They just make toast, they don't cook fancy meals."
+      },
+      %{
+        "x" => 0.55,
+        "y" => 0.65,
+        "width" => 0.08,
+        "height" => 0.1,
+        "label" => "banana with sneakers",
+        "explanation" => "Bananas don't wear sneakers! They can't walk or run around."
+      }
+    ],
+    created_by_ai: true
+  },
+  %{
+    title: "Silly Park Adventure",
+    image_url: "https://example.com/silly-challenges/park-scene.jpg",
+    difficulty: "medium", 
+    regions: [
+      %{
+        "x" => 0.18,
+        "y" => 0.22,
+        "width" => 0.14,
+        "height" => 0.16,
+        "label" => "tree with googly eyes",
+        "explanation" => "Trees don't have googly eyes! They can't see or blink like we do."
+      },
+      %{
+        "x" => 0.45,
+        "y" => 0.55,
+        "width" => 0.12,
+        "height" => 0.2,
+        "label" => "duck with a backpack",
+        "explanation" => "Ducks don't carry backpacks! They already have everything they need to swim and fly."
+      },
+      %{
+        "x" => 0.72,
+        "y" => 0.38,
+        "width" => 0.1,
+        "height" => 0.12,
+        "label" => "bench with arms and legs",
+        "explanation" => "Benches don't have arms and legs! They stay in one place for people to sit on."
+      }
+    ],
+    created_by_ai: true
+  }
+]
+
+# Insert sample silly challenges
+Enum.each(silly_challenges, fn challenge_data ->
+  {:ok, challenge} = Games.create_silly_image_challenge(challenge_data)
+  IO.puts("Created silly challenge: #{challenge.title}")
+end)
+
 IO.puts("\n🎉 Database seeded successfully!")
 IO.puts("👤 Parent login: parent@example.com / password123")
 IO.puts("👶 Children: Emma (🦄), Alex (🚀), Sam (🌟)")
 IO.puts("🎯 #{length(sample_missions)} missions created")
+IO.puts("🤪 #{length(silly_challenges)} silly challenges created")
 IO.puts("📊 Sample progress data created for Emma")
 IO.puts("\nStart the server with: mix phx.server")
 IO.puts("API available at: http://localhost:4000/api/v1")

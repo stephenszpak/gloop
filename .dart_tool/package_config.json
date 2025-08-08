@@ -80,6 +80,12 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "flutter_tts",
+      "rootUri": "file:///Users/stephenszpak/.pub-cache/hosted/pub.dev/flutter_tts-3.8.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_web_plugins",
       "rootUri": "file:///opt/homebrew/share/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",

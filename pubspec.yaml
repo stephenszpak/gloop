@@ -26,6 +26,9 @@ dependencies:
   
   # Storage
   shared_preferences: ^2.2.2
+  
+  # Text-to-Speech
+  flutter_tts: ^3.8.5
 
 dev_dependencies:
   flutter_test:

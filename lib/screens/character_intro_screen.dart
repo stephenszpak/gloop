@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../widgets/detective_bubble.dart';
+import '../widgets/voiceover_bubble.dart';
 import '../theme/app_theme.dart';
 
 class CharacterIntroScreen extends StatelessWidget {
@@ -11,29 +12,43 @@ class CharacterIntroScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: GloopColors.warmBeige,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Detective Bubble taking up most of the screen
-            Expanded(
-              flex: 3,
-              child: DetectiveBubble(
+            // Detective Bubble with voiceover - now includes controls below image
+            DetectiveBubble(
+              voiceoverBubble: VoiceoverBubble(
                 text: "Hi there! I'm Detective Gloop, your media literacy guide! I help kids like you learn to spot what's real and what's fake. Are you ready to become a super detective and play some exciting missions?",
-                textStyle: const TextStyle(
-                  fontSize: 18,
+                baseStyle: const TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: GloopColors.darkTeal,
-                  height: 1.4,
+                  height: 1.2,
+                ),
+                highlightStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: GloopColors.deepTeal,
+                  height: 1.2,
+                  shadows: [
+                    Shadow(
+                      color: GloopColors.mustardYellow,
+                      blurRadius: 1,
+                      offset: Offset(0.6, 0.6),
+                    ),
+                  ],
                 ),
               ),
             ),
             
-            // Action buttons at bottom
-            Expanded(
-              flex: 1,
+            // Navigation buttons at bottom
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Primary action button
                     SizedBox(
